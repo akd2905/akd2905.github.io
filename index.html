@@ -591,9 +591,10 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      margin-top: -1rem;
+      width: 100%;
+      margin: -.6rem 0 0;
       position: relative;
-      z-index: 1;
+      z-index: 3;
     }
     .timeline-end-spine {
       width: 3px;
@@ -705,6 +706,10 @@
        RESPONSIVE — MOBILE (max 640px) — Android & iPhone
     ============================================================ */
     @media(max-width:640px){
+      /* Hide custom cursor on touch devices */
+      * { cursor: auto !important; }
+      #cursor, #cursor-ring { display: none !important; }
+
       /* Viewport & sections */
       section, #story-section, #events-section, #venue-section,
       #blessings-section, #rsvp-section {
@@ -730,7 +735,10 @@
         margin-bottom: 2rem;
       }
       .timeline-dot {
-        left: 6px;
+        /* spine center = left:16px + 1.5px = 17.5px
+           dot center   = left + translateX(-50%) = left value
+           so set left: 17px to match */
+        left: 17px;
         top: .8rem;
         width: 16px; height: 16px;
       }
@@ -740,17 +748,36 @@
         box-shadow: 3px 3px 0 var(--red);
         padding: 1rem 1.1rem;
       }
-      /* Timeline-end: align spine to left side to match mobile spine position */
+      /* Timeline-end: absolute-pin spine & diamond to exact spine x-coordinate */
       .timeline-end {
-        align-items: flex-start;
-        padding-left: 8px;
-        margin-top: 0;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        padding-top: 58px;   /* clears the absolute spine + diamond above */
+        margin-top: -.5rem;
       }
-      .timeline-end-spine { margin-left: 9px; }
-      .timeline-end-diamond { margin-left: 2px; }
+      .timeline-end-spine {
+        position: absolute;
+        top: 0;
+        left: 16px;               /* spine center = 16 + 1.5 = 17.5px */
+        transform: translateX(-50%);
+        height: 38px;
+        margin-left: 0;
+      }
+      .timeline-end-diamond {
+        position: absolute;
+        top: 34px;
+        left: 8px;                /* center = 8 + 10 = 18px ≈ 17.5px */
+        margin-left: 0;
+        margin-bottom: 0;
+        transform: rotate(45deg);
+      }
       .timeline-end .btn-open {
         align-self: center;
         margin-left: 0;
+        margin-top: 0;
       }
 
       /* Events grid — stack to single column */
@@ -1511,15 +1538,14 @@
       <div class="timeline-dot"></div>
       <div style="flex:1;"></div>
     </div>
-  </div>
-
-  <!-- Spine continues down to the invitation button -->
-  <div class="timeline-end">
-    <div class="timeline-end-spine"></div>
-    <div class="timeline-end-diamond"></div>
-    <button class="btn-open" id="open-inv-btn" onclick="openInvitation()">
-      <span>🌿 Open Invitation 🌿</span>
-    </button>
+    <!-- Spine continues down to the invitation button -->
+    <div class="timeline-end">
+      <div class="timeline-end-spine"></div>
+      <div class="timeline-end-diamond"></div>
+      <button class="btn-open" id="open-inv-btn" onclick="openInvitation()">
+        <span>🌿 Open Invitation 🌿</span>
+      </button>
+    </div>
   </div>
 </section>
 
@@ -1776,25 +1802,27 @@
   /* -------------------------------------------------------
      CURSOR
   ------------------------------------------------------- */
-  const cursor = document.getElementById('cursor');
-  const cursorRing = document.getElementById('cursor-ring');
-  let mx = -100, my = -100;
+  if (!('ontouchstart' in window) && !navigator.maxTouchPoints) {
+    const cursor = document.getElementById('cursor');
+    const cursorRing = document.getElementById('cursor-ring');
+    let mx = -100, my = -100;
 
-  document.addEventListener('mousemove', e => {
-    mx = e.clientX; my = e.clientY;
-    gsap.to(cursor,     { x: mx, y: my, duration: .08 });
-    gsap.to(cursorRing, { x: mx, y: my, duration: .25 });
-  });
-  document.querySelectorAll('a, button, .event-card, .gallery-nav, .gallery-dot, .confetti-btn').forEach(el => {
-    el.addEventListener('mouseenter', () => {
-      gsap.to(cursor,     { scale: 2.2, duration: .2 });
-      gsap.to(cursorRing, { scale: 1.6, borderColor: 'var(--gold3)', duration: .2 });
+    document.addEventListener('mousemove', e => {
+      mx = e.clientX; my = e.clientY;
+      gsap.to(cursor,     { x: mx, y: my, duration: .08 });
+      gsap.to(cursorRing, { x: mx, y: my, duration: .25 });
     });
-    el.addEventListener('mouseleave', () => {
-      gsap.to(cursor,     { scale: 1,   duration: .2 });
-      gsap.to(cursorRing, { scale: 1,   borderColor: 'var(--gold2)', duration: .2 });
+    document.querySelectorAll('a, button, .event-card, .gallery-nav, .gallery-dot, .confetti-btn').forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        gsap.to(cursor,     { scale: 2.2, duration: .2 });
+        gsap.to(cursorRing, { scale: 1.6, borderColor: 'var(--gold3)', duration: .2 });
+      });
+      el.addEventListener('mouseleave', () => {
+        gsap.to(cursor,     { scale: 1,   duration: .2 });
+        gsap.to(cursorRing, { scale: 1,   borderColor: 'var(--gold2)', duration: .2 });
+      });
     });
-  });
+  }
 
   /* -------------------------------------------------------
      LOADER
