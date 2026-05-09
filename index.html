@@ -740,6 +740,18 @@
         box-shadow: 3px 3px 0 var(--red);
         padding: 1rem 1.1rem;
       }
+      /* Timeline-end: align spine to left side to match mobile spine position */
+      .timeline-end {
+        align-items: flex-start;
+        padding-left: 8px;
+        margin-top: 0;
+      }
+      .timeline-end-spine { margin-left: 9px; }
+      .timeline-end-diamond { margin-left: 2px; }
+      .timeline-end .btn-open {
+        align-self: center;
+        margin-left: 0;
+      }
 
       /* Events grid — stack to single column */
       .events-grid { grid-template-columns: 1fr !important; }
